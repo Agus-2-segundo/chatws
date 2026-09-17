@@ -2,15 +2,33 @@ let stompClient = null;
 
 function connect() {
     const serverIp = document.getElementById('serverIp').value;
-    
-//conexion y subcripcion
+
+    const socket = new SockJS("http://" + serverIp + ":8080/chat");
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame){
+        setConnected(true);
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/public', function (message) {
+            showMessage(JSON.parse(message.body));
+        });
+    }, function (error) {
+        console.error('Error connecting to WebSocket:', error);
+        setConnected(false);
+    });
+
+    //conexion y subcripcion
 }
 
 function disconnect() {
     // Desconectar
+    if (stompClient !== null) {
+        stompClient.disconnect();
+    }
     setConnected(false);
     console.log("Disconnected");
 }
+
 
 function setConnected(connected) {
     const status = document.getElementById('status');
@@ -27,11 +45,17 @@ function setConnected(connected) {
 function sendMessage() {
     const username = document.getElementById('username').value;
     const content = document.getElementById('message').value;
-    
+
     if (content.trim() === '') return;
-    
-     // Conexion
-    
+
+    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
+        tipo: 'CHAT',
+        usuario: username,
+        contenido: content
+    }));
+
+    // Conexion
+
     document.getElementById('message').value = '';
 }
 
