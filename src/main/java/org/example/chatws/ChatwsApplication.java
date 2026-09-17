@@ -1,6 +1,5 @@
 package org.example.chatws;
 
-import org.example.chatws.utility.ChatCliente;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
